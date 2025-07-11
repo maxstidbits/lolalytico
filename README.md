@@ -1,6 +1,6 @@
 # Unofficial lolalytics scraper  
 [TBA] a lot of things
----
+
 ## Functions  
 ### `get_tierlist(n: int = 10, lane: str = '', rank: str = '')`
 *Empty rank is set by default to Emerald+  
