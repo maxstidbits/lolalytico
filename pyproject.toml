@@ -11,7 +11,7 @@ authors = [
 description = "Unofficial python API wrapper for Lolalytics"
 readme = "README.md"
 requires-python = ">=3.6"
-classifiers = [
+dependencies = [
     "requests",
     "lxml",
 ]
