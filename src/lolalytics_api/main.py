@@ -70,6 +70,7 @@ def display_ranks(display: bool = True):
             'null': 'unranked',
             '-': 'unranked',
             'all': 'all',
+            'otp': '1trick',
             '1trick': '1trick',
             '1-trick': '1trick',
             '1trickpony': '1trick',
