@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "lolalytics-api"
 version = "0.0.2"
 authors = [
-  { name="xPerSki", email="xperski@pm.me" },
+  { name="xPerSki" }
 ]
 description = "Unofficial python API wrapper for Lolalytics"
 readme = "README.md"
