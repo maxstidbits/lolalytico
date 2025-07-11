@@ -1,6 +1,5 @@
 import pytest
 import json
-from unittest.mock import patch, Mock
 from lolalytics_api import get_tierlist, get_counters
 
 
@@ -17,17 +16,7 @@ class TestGetTierlist:
             except:
                 pass
 
-    @patch('lolalytics_api.main.requests.get')
-    def test_get_tierlist_returns_json(self, mock_get):
-        mock_response = Mock()
-        mock_response.content = b'''
-        <html><body><main>
-        <div><div></div><div></div><div></div>
-        <div><div>1</div><div></div><div><a>TestChamp</a></div><div>S+</div><div></div><div><div><span>55.2%</span></div></div></div>
-        </div></main></body></html>
-        '''
-        mock_get.return_value = mock_response
-
+    def test_get_tierlist_returns_json(self):
         result = get_tierlist(1)
         parsed = json.loads(result)
 
@@ -44,16 +33,7 @@ class TestGetCounters:
         with pytest.raises(ValueError, match="Champion name cannot be empty"):
             get_counters(5, "")
 
-    @patch('lolalytics_api.main.requests.get')
-    def test_get_counters_returns_json(self, mock_get):
-        mock_response = Mock()
-        mock_response.content = b'''
-        <html><body><main>
-        <div><div><div><div><span><div><a><div><div>CounterChamp</div><div><div>60.5%</div></div></div></a></div></span></div></div></div></div>
-        </main></body></html>
-        '''
-        mock_get.return_value = mock_response
-
+    def test_get_counters_returns_json(self):
         result = get_counters(1, "yasuo")
         assert isinstance(result, str)
         parsed = json.loads(result)
