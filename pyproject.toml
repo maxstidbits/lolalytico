@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lolalytics-api"
-version = "0.0.1"
+version = "0.0.2"
 authors = [
   { name="xPerSki", email="xperski@pm.me" },
 ]
@@ -24,6 +24,12 @@ classifiers = [
 ]
 license = {text = "MIT"}
 
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-mock",
+]
+
 [project.urls]
 Homepage = "https://github.com/xPerSki/lolalytics-api"
 Repository = "https://github.com/xPerSki/lolalytics-api"
@@ -31,3 +37,6 @@ Issues = "https://github.com/xPerSki/lolalytics-api/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"
