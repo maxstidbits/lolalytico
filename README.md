@@ -9,8 +9,7 @@
       "champion": "Ahri",
       "tier": "S",
       "winrate": "52.73"
-    },
-    ...
+    }
 }
 ```
 
@@ -20,7 +19,6 @@
   "0": {
       "champion": "Akali",
       "winrate": "47.91"
-    },
-    ...
+    }
 }
 ```
