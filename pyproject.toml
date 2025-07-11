@@ -8,7 +8,7 @@ version = "0.0.3"
 authors = [
   { name="xPerSki" }
 ]
-description = "Unofficial python API wrapper for Lolalytics"
+description = "Unofficial Lolalytics scraper"
 readme = "README.md"
 requires-python = ">=3.6"
 dependencies = [

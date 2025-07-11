@@ -1,4 +1,4 @@
-# Unofficial lolalytics scraper  
+# Unofficial Lolalytics scraper  
 [TBA] a lot of things
 
 ## Installation  
