@@ -7,7 +7,8 @@ pip install lolalytics-api
 ```
 
 ## Functions  
-### `get_tierlist(n: int = 10, lane: str = '', rank: str = '')`
+### `get_tierlist`
+- `def get_tierlist(n: int = 10, lane: str = '', rank: str = '')`  
 *Empty rank is set by default to Emerald+  
 *Empty lane is set by default to all lanes  
 ```json
@@ -27,7 +28,8 @@ pip install lolalytics-api
 }
 ```
 
-### `get_counters(n: int = 10, champion: str = '', rank: str = '')`  
+### `get_counters`
+- `def get_counters(n: int = 10, champion: str = '', rank: str = '')`  
 *Empty rank is set by default to Emerald+
 ```json
 {
@@ -38,10 +40,12 @@ pip install lolalytics-api
 }
 ```
 
-### `display_ranks(display: bool = True)`
+### `display_ranks`
+- `def display_ranks(display: bool = True)`  
 Display all available ranks and their shortcuts.  
 If display is True (default), prints the ranks to the console.  
 Otherwise, returns a dict.
 
-### `display_lanes(display: bool = True)`
+### `display_lanes`
+- `def display_lanes(display: bool = True)`  
 Same as above, but for lanes.
