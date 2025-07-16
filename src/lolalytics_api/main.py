@@ -308,9 +308,10 @@ def matchup(champion1: str, champion2: str, lane: str = '', rank: str = ''):
     return json.dumps(result, indent=4)
 
 
-def patch_notes(rank: str = ''):
+def patch_notes(category: str, rank: str = ''):
     """
     Get the latest changes in pick/ban rates.
+    :param category: buffed, nerfed, adjusted or all.
     :param rank: Rank to filter the patch notes by (see ``display_ranks()``).
     :return: JSON containing patch notes data.
     """
@@ -320,21 +321,26 @@ def patch_notes(rank: str = ''):
         base_link = _sort_by_rank(base_link, rank)
 
     tree = html.fromstring(requests.get(base_link).content)
-    result = {
-        'buffed': {},
-        'nerfed': {},
-        'adjusted': {}
-    }
+    if category == 'all':
+        result = {
+            'buffed': {},
+            'nerfed': {},
+            'adjusted': {}
+        }
+    else:
+        result = {
+            category: {}
+        }
 
-    # buffed, nerfed, adjusted
-    def _parse_data(category: str, i: int = 0):
+    def _parse_data(_category: str = category):
         category_mapping = {
             'buffed': 1,
             'nerfed': 2,
             'adjusted': 3
         }
-        category_idx = category_mapping[category.lower()]
+        category_idx = category_mapping[_category]
 
+        i = 0
         while True:
             i += 1
             champion_name_xpath = f'/html/body/main/div[5]/div[4]/div[{category_idx}]/div/div[{i}]/div/div[1]/span[1]/a'
@@ -343,7 +349,7 @@ def patch_notes(rank: str = ''):
             banrate_xpath = f'/html/body/main/div[5]/div[4]/div[{category_idx}]/div/div[{i}]/div/div[3]/span[2]'
 
             try:
-                result[category][i - 1] = {
+                result[_category][i - 1] = {
                     'champion': tree.xpath(champion_name_xpath)[0].text_content().strip(),
                     'winrate': tree.xpath(winrate_xpath)[0].text_content().strip(),
                     'pickrate': tree.xpath(pickrate_xpath)[0].text_content().strip(),
@@ -352,7 +358,11 @@ def patch_notes(rank: str = ''):
             except IndexError:
                 break
 
-    for cat in result.keys():
-        _parse_data(cat)
+    if category == 'all':
+        _parse_data('buffed')
+        _parse_data('nerfed')
+        _parse_data('adjusted')
+    else:
+        _parse_data()
 
     return json.dumps(result, indent=4)
