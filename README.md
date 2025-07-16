@@ -77,7 +77,7 @@ Returns winrate and number of games played in a matchup between two champions.
 ```
 
 ### `patch_notes`
-- `def patch_notes(rank: str = ''')`  
+- `def patch_notes(rank: str = '')`  
 It does NOT show detailed patch notes.  
 Nevertheless, it shows which champions were buffed/nerfed/adjusted, also with the winrate/pickrate/banrate changes for each of them.  
 ```json
