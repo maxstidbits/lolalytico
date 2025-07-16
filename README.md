@@ -49,3 +49,62 @@ Otherwise, returns a dict.
 ### `display_lanes`
 - `def display_lanes(display: bool = True)`  
 Same as above, but for lanes.
+
+### `get_champion_data`  
+- `def get_champion_data(champion: str, lane: str = '', rank: str = '')`  
+Returns detailed info about a certain champion.  
+```json
+{
+    "winrate": "51.7%",
+    "wr_delta": "0.93%",
+    "game_avg_wr": "50.77%",
+    "pickrate": "7.46%",
+    "tier": "S+",
+    "rank": "1 / 99",
+    "banrate": "10.27%",
+    "games": "67,380"
+}
+```
+
+### `matchup`
+- `def matchup(champion1: str, champion2: str, lane: str = '', rank: str = '')`  
+Returns winrate and number of games played in a matchup between two champions.  
+```json
+{
+    "winrate": "49.8%",
+    "number_of_games": "1,000"
+}
+```
+
+### `patch_notes`
+- `def patch_notes(rank: str = ''')`  
+It does NOT show detailed patch notes.  
+Nevertheless, it shows which champions were buffed/nerfed/adjusted, also with the winrate/pickrate/banrate changes for each of them.  
+```json
+{
+    "buffed": {
+        "0": {
+            "champion": "Fiddlesticks",
+            "winrate": "52.48% (+0.80%)",
+            "pickrate": "2.88 (+0.55)",
+            "banrate": "3.12 (+0.47)"
+        }
+    },
+    "nerfed": {
+        "0": {
+            "champion": "Ryze",
+            "winrate": "49.03% (-0.67%)",
+            "pickrate": "3.45 (-0.07)",
+            "banrate": "0.68 (-0.10)"
+        }
+    },
+    "adjusted": {
+        "0": {
+            "champion": "Briar",
+            "winrate": "52.66% (+0.61%)",
+            "pickrate": "3.70 (+0.63)",
+            "banrate": "5.14 (+1.53)"
+        }
+    }
+}
+```

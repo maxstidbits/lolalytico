@@ -4,7 +4,7 @@ from lxml import html
 from lolalytics_api.errors import InvalidLane, InvalidRank
 
 
-def display_ranks(display: bool = True):
+def display_ranks(display: bool = True) -> dict:
     """
     Display all available ranks and their shortcuts.
     :param display: If True (default), prints the ranks to the console. Otherwise, returns a dict.
@@ -85,7 +85,7 @@ def display_ranks(display: bool = True):
         return rank_mappings
 
 
-def display_lanes(display: bool = True):
+def display_lanes(display: bool = True) -> dict:
     """
     Display all available lanes and their shortcuts.
     :param display: If True (default), prints the lanes to the console. Otherwise, returns a dict.
@@ -114,7 +114,7 @@ def display_lanes(display: bool = True):
         return lane_mappings
 
 
-def _sort_by_rank(link: str, rank: str):
+def _sort_by_rank(link: str, rank: str) -> str:
     """
     Update the link to sort by a specific rank.
     :param link: url to the page to sort.
@@ -133,6 +133,25 @@ def _sort_by_rank(link: str, rank: str):
         return f'{link}?tier={mapped_rank}'
 
 
+def _sort_by_lane(link: str, lane: str) -> str:
+    """
+    Update the link to filter by a specific lane.
+    :param link: url to the page to filter.
+    :param lane: lane to filter by (see ``display_lanes()``).
+    :return: new link with the lane filter applied.
+    """
+    lane_mappings = display_lanes(display=False)
+    try:
+        mapped_lane = lane_mappings[lane.lower()]
+    except KeyError:
+        raise InvalidLane(lane)
+
+    if '?' in link:
+        return f'{link}&lane={mapped_lane}'
+    else:
+        return f'{link}?lane={mapped_lane}'
+
+
 def get_tierlist(n: int = 10, lane: str = '', rank: str = ''):
     """
     Get the top n champions in the tier list for a specific lane.
@@ -141,22 +160,15 @@ def get_tierlist(n: int = 10, lane: str = '', rank: str = ''):
     :param rank: sort by rank (see ``display_ranks()``).
     :return: JSON containing rank, champion name, tier and winrate.
     """
-    lane_mappings = display_lanes(display=False)
-    try:
-        mapped_lane = lane_mappings[lane.lower()]
-    except KeyError:
-        raise InvalidLane(lane)
-
     base_url = 'https://lolalytics.com/lol/tierlist/'
-    if mapped_lane:
-        tierlist = f'{base_url}?lane={mapped_lane}'
-    else:
-        tierlist = base_url
+
+    if lane:
+        base_url = _sort_by_lane(base_url, lane)
 
     if rank:
-        tierlist = _sort_by_rank(tierlist, rank)
+        base_url = _sort_by_rank(base_url, rank)
 
-    tierlist_html = requests.get(tierlist)
+    tierlist_html = requests.get(base_url)
     tree = html.fromstring(tierlist_html.content)
     result = {}
 
@@ -213,3 +225,140 @@ def get_counters(n: int = 10, champion: str = '', rank: str = ''):
         }
 
     return json.dumps(result, indent=4)
+
+
+def get_champion_data(champion: str, lane: str = '', rank: str = ''):
+    """
+    Get detailed info about a certain champion.
+    :param champion: Champion name to search for.
+    :param lane: Lane to filter by (see ``display_lanes()``).
+    :param rank: Sort by rank (see ``display_ranks()``).
+    :return: JSON containing the data.
+    """
+    if champion == '':
+        raise ValueError("Champion name cannot be empty")
+
+    base_link = f'https://lolalytics.com/lol/{champion}/build/'
+
+    if lane:
+        base_link = _sort_by_lane(base_link, lane)
+
+    if rank:
+        base_link = _sort_by_rank(base_link, rank)
+
+    tree = html.fromstring(requests.get(base_link).content)
+    result = {}
+
+    labels = [
+        'winrate',
+        'wr_delta',
+        'game_avg_wr',
+        'pickrate',
+        'tier',
+        'rank',
+        'banrate',
+        'games'
+    ]
+    for i in range(1, 9):
+        """
+        This range goes like this:
+        For rows: (i // 5) + 1 -> it gives numbers 1, 1, 1, 1, 2, 2, 2, 2
+        For columns: ((i - 1) % 4) + 1 -> it gives numbers 1, 2, 3, 4, 1, 2, 3, 4
+        So we get the following structure: row 1 has columns 1-4, row 2 has columns 1-4, etc.
+        """
+        current_xpath = f'/html/body/main/div[5]/div[1]/div[2]/div[2]/div[{(i//5)+1}]/div[{((i-1)%4)+1}]/div[1]'
+        result[labels[i-1]] = tree.xpath(current_xpath)[0].text_content().strip().split('\n')[0]
+
+    return json.dumps(result, indent=4)
+
+
+def matchup(champion1: str, champion2: str, lane: str = '', rank: str = ''):
+    """
+    Get the matchup data between two champions.
+    :param champion1: First champion name.
+    :param champion2: Second champion name.
+    :param lane: Lane to filter the matchup by (see ``display_lanes()``).
+    :param rank: Sort by rank (see ``display_ranks()``).
+    :return: JSON containing matchup data.
+    """
+    if champion1 == '' or champion2 == '':
+        raise ValueError("Champion names cannot be empty")
+
+    base_link = f"https://lolalytics.com/lol/{champion1}/vs/{champion2}/build/"
+
+    if lane:
+        base_link = _sort_by_lane(base_link, lane)
+
+    if rank:
+        base_link = _sort_by_rank(base_link, rank)
+
+    tree = html.fromstring(requests.get(base_link).content)
+
+    winrate_xpath = f'/html/body/main/div[5]/div[1]/div[2]/div[3]/div/div/div[1]/div[1]'
+    nof_games_xpath = f'/html/body/main/div[5]/div[1]/div[2]/div[3]/div/div/div[2]/div[1]'
+
+    winrate = tree.xpath(winrate_xpath)[0].text_content().strip()
+    nof_games = tree.xpath(nof_games_xpath)[0].text_content().strip()
+
+    result = {
+        'winrate': winrate.split('%')[0],
+        'number_of_games': nof_games
+    }
+
+    return json.dumps(result, indent=4)
+
+
+def patch_notes(rank: str = ''):
+    """
+    Get the latest changes in pick/ban rates.
+    :param rank: Rank to filter the patch notes by (see ``display_ranks()``).
+    :return: JSON containing patch notes data.
+    """
+    base_link = 'https://lolalytics.com/'
+
+    if rank:
+        base_link = _sort_by_rank(base_link, rank)
+
+    tree = html.fromstring(requests.get(base_link).content)
+    result = {
+        'buffed': {},
+        'nerfed': {},
+        'adjusted': {}
+    }
+
+    # buffed, nerfed, adjusted
+    def _parse_data(category: str, i: int = 0):
+        category_mapping = {
+            'buffed': 1,
+            'nerfed': 2,
+            'adjusted': 3
+        }
+        category_idx = category_mapping[category.lower()]
+
+        while True:
+            i += 1
+            champion_name_xpath = f'/html/body/main/div[5]/div[4]/div[{category_idx}]/div/div[{i}]/div/div[1]/span[1]/a'
+            winrate_xpath = f'/html/body/main/div[5]/div[4]/div[{category_idx}]/div/div[{i}]/div/div[2]/span'
+            pickrate_xpath = f'/html/body/main/div[5]/div[4]/div[{category_idx}]/div/div[{i}]/div/div[3]/span[1]'
+            banrate_xpath = f'/html/body/main/div[5]/div[4]/div[{category_idx}]/div/div[{i}]/div/div[3]/span[2]'
+
+            try:
+                result[category][i - 1] = {
+                    'champion': tree.xpath(champion_name_xpath)[0].text_content().strip(),
+                    'winrate': tree.xpath(winrate_xpath)[0].text_content().strip(),
+                    'pickrate': tree.xpath(pickrate_xpath)[0].text_content().strip(),
+                    'banrate': tree.xpath(banrate_xpath)[0].text_content().strip()
+                }
+            except IndexError:
+                break
+
+    for cat in result.keys():
+        _parse_data(cat)
+
+    return json.dumps(result, indent=4)
+
+
+if __name__ == "__main__":
+    # print(matchup('fiddlesticks', 'darius', 'top', 'd+'))
+    print(patch_notes())
+    # print(get_champion_data('jax', 'top', 'd+'))
