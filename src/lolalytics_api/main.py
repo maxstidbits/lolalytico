@@ -356,9 +356,3 @@ def patch_notes(rank: str = ''):
         _parse_data(cat)
 
     return json.dumps(result, indent=4)
-
-
-if __name__ == "__main__":
-    # print(matchup('fiddlesticks', 'darius', 'top', 'd+'))
-    print(patch_notes())
-    # print(get_champion_data('jax', 'top', 'd+'))
