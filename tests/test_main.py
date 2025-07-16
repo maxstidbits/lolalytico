@@ -86,7 +86,7 @@ class TestChampionData:
         _check_labels(parsed, labels)
 
     def test_patch_notes(self):
-        result = patch_notes("g+")
+        result = patch_notes("all", "g+")
         parsed = json.loads(result)
 
         labels = [
