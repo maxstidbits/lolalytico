@@ -1,6 +1,10 @@
-import pytest
 import json
-from lolalytics_api.main import *
+import pytest
+
+from lolalytics_api.main import LolalyticsClient, display_lanes, display_ranks
+from lolalytics_api.errors import InvalidLane, InvalidRank
+
+pytestmark = pytest.mark.asyncio
 
 
 def _check_labels(data, labels):
@@ -9,89 +13,86 @@ def _check_labels(data, labels):
 
 
 class TestGetTierlist:
-    def test_invalid_lane_raises_error(self):
-        with pytest.raises(InvalidLane):
-            get_tierlist(5, "test", "gm+")
+    async def test_invalid_lane_raises_error(self):
+        async with LolalyticsClient() as client:
+            with pytest.raises(InvalidLane):
+                await client.get_tierlist(5, lane="test", rank="gm+")
 
-    def test_invalid_rank_raises_error(self):
-        with pytest.raises(InvalidRank):
-            get_tierlist(5, "top", "test")
+    async def test_invalid_rank_raises_error(self):
+        async with LolalyticsClient() as client:
+            with pytest.raises(InvalidRank):
+                await client.get_tierlist(5, lane="top", rank="test")
 
-    def test_lane_shortcuts(self):
-        valid_lanes = ['top', 'jg', 'jng', 'jungle', 'mid', 'middle', 'bot', 'bottom', 'adc', 'support', 'supp', 'sup']
-        for lane in valid_lanes:
-            try:
-                get_tierlist(1, lane)
-            except InvalidLane:
-                pytest.fail(f"Valid lane '{lane}' raised InvalidLane error")
-
-    def test_get_tierlist_returns_json(self):
-        result = get_tierlist(1)
-        parsed = json.loads(result)
-
-        labels = [
-            'rank',
-            'champion',
-            'tier',
-            'winrate'
+    async def test_lane_shortcuts(self):
+        valid_lanes = [
+            "top",
+            "jg",
+            "jng",
+            "jungle",
+            "mid",
+            "middle",
+            "bot",
+            "bottom",
+            "adc",
+            "support",
+            "supp",
+            "sup",
         ]
-        assert len(parsed) == 1
-        assert '0' in parsed
-        _check_labels(parsed['0'], labels)
+        async with LolalyticsClient() as client:
+            for lane in valid_lanes:
+                try:
+                    await client.get_tierlist(1, lane=lane)
+                except InvalidLane:
+                    pytest.fail(f"Valid lane '{lane}' raised InvalidLane error")
+
+    async def test_get_tierlist_returns_sequence(self):
+        async with LolalyticsClient() as client:
+            result = await client.get_tierlist(1)
+        assert isinstance(result, list)
+        assert len(result) == 1
+        labels = ["rank", "champion", "tier", "winrate"]
+        _check_labels(result[0], labels)
 
 
 class TestGetCounters:
-    def test_empty_champion_raises_error(self):
-        with pytest.raises(ValueError, match="Champion name cannot be empty"):
-            get_counters(5, "")
+    async def test_empty_champion_raises_error(self):
+        async with LolalyticsClient() as client:
+            with pytest.raises(ValueError, match="Champion name cannot be empty"):
+                await client.get_counters(n=5, champion="")
 
-    def test_get_counters_returns_json(self):
-        result = get_counters(1, "yasuo")
-        parsed = json.loads(result)
-
-        labels = [
-            'champion',
-            'winrate',
-        ]
-        assert len(parsed) == 1
-        assert '0' in parsed
-        _check_labels(parsed['0'], labels)
+    async def test_get_counters_returns_sequence(self):
+        async with LolalyticsClient() as client:
+            result = await client.get_counters(n=1, champion="yasuo")
+        assert isinstance(result, list)
+        assert len(result) == 1
+        labels = ["champion", "winrate"]
+        _check_labels(result[0], labels)
 
 
 class TestChampionData:
-    def test_champion_data(self):
-        result = get_champion_data("jax", 'top', 'd+')
-        parsed = json.loads(result)
-
+    async def test_champion_data(self):
+        async with LolalyticsClient() as client:
+            data = await client.get_champion_data(champion="jax", lane="top", rank="d+")
         labels = [
-            'winrate',
-            'wr_delta',
-            'game_avg_wr',
-            'pickrate',
-            'tier',
-            'rank',
-            'banrate',
-            'games'
+            "winrate",
+            "wr_delta",
+            "game_avg_wr",
+            "pickrate",
+            "tier",
+            "rank",
+            "banrate",
+            "games",
         ]
-        _check_labels(parsed, labels)
+        _check_labels(data, labels)
 
-    def test_matchup(self):
-        result = matchup("jax", "vayne", "top", "master")
-        parsed = json.loads(result)
+    async def test_matchup(self):
+        async with LolalyticsClient() as client:
+            data = await client.matchup(champion1="jax", champion2="vayne", lane="top", rank="master")
+        labels = ["winrate", "number_of_games"]
+        _check_labels(data, labels)
 
-        labels = [
-            'winrate',
-            'number_of_games',
-        ]
-        _check_labels(parsed, labels)
-
-    def test_patch_notes(self):
-        result = patch_notes("all", "g+")
-        parsed = json.loads(result)
-
-        labels = [
-            'buffed',
-            'nerfed',
-            'adjusted'
-        ]
-        _check_labels(parsed, labels)
+    async def test_patch_notes(self):
+        async with LolalyticsClient() as client:
+            data = await client.patch_notes(category="all", rank="g+")
+        labels = ["buffed", "nerfed", "adjusted"]
+        _check_labels(data, labels)
