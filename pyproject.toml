@@ -6,14 +6,14 @@ build-backend = "setuptools.build_meta"
 name = "lolalytics-api"
 version = "0.0.6"
 authors = [
-  { name="xPerSki" }
+  { name = "Max Tretikov" }
 ]
 description = "Unofficial Lolalytics scraper"
 readme = "README.md"
 requires-python = ">=3.6"
 dependencies = [
-    "requests",
-    "lxml",
+    "aiohttp",
+    "lxml"
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -22,17 +22,18 @@ classifiers = [
     "Topic :: Games/Entertainment",
     "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
 ]
-license = {text = "MIT"}
+license = { text = "MIT" }
 
 [project.optional-dependencies]
 test = [
     "pytest",
+    "pytest-asyncio"
 ]
 
 [project.urls]
-Homepage = "https://github.com/xPerSki/lolalytics-api"
-Repository = "https://github.com/xPerSki/lolalytics-api"
-Issues = "https://github.com/xPerSki/lolalytics-api/issues"
+Homepage = "https://github.com/maxstidbits/lolalytics-api"
+Repository = "https://github.com/maxstidbits/lolalytics-api"
+Issues = "https://github.com/maxstidbits/lolalytics-api/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
