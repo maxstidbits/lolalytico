@@ -211,6 +211,7 @@ class LolalyticsClient:
     async def get_counters(self, *, n: int = 10, champion: str, rank: str = "") -> List[Dict[str, str]]:
         if not champion:
             raise ValueError("Champion name cannot be empty")
+        champion = champion.lower()
         path = f"lol/{champion}/counters/"
         url = self._build_url(path, rank=rank)
         tree = await self._fetch_tree(url)
@@ -227,6 +228,7 @@ class LolalyticsClient:
     async def get_champion_data(self, *, champion: str, lane: str = "", rank: str = "") -> Dict[str, str]:
         if not champion:
             raise ValueError("Champion name cannot be empty")
+        champion = champion.lower()
         path = f"lol/{champion}/build/"
         url = self._build_url(path, lane=lane, rank=rank)
         tree = await self._fetch_tree(url)
@@ -262,6 +264,8 @@ class LolalyticsClient:
     ) -> Dict[str, str]:
         if not champion1 or not champion2:
             raise ValueError("Champion names cannot be empty")
+        champion1 = champion1.lower()
+        champion2 = champion2.lower()
         path = f"lol/{champion1}/vs/{champion2}/build/"
         url = self._build_url(path, lane=lane, rank=rank)
         tree = await self._fetch_tree(url)
