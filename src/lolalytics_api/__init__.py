@@ -1,9 +1,24 @@
-from .main import get_tierlist, get_counters, _sort_by_rank, display_lanes, display_ranks, get_champion_data, matchup, \
-    patch_notes
+from .main import (
+    LolalyticsClient, 
+    display_ranks, 
+    display_lanes, 
+
+    _run, 
+    get_event_loop_safe,
+
+    tierlist,
+    counters,
+    champion_data,
+    matchup,
+    patch
+)
 from .errors import InvalidLane, InvalidRank
 
 __version__ = "0.0.6"
-__author__ = "xPerSki"
+__author__ = "Max Tretikov"
 
-__all__ = ["get_tierlist", "get_counters", "display_lanes", "display_ranks", "InvalidRank", "InvalidLane",
-           "get_champion_data", "matchup", "patch_notes"]
+__all__ = ["LolalyticsClient", 
+           "display_ranks", "display_lanes", 
+           "InvalidRank", "InvalidLane",
+           "tierlist", "counters", "champion_data", "matchup", "patch",
+           "_run", "get_event_loop_safe"]
