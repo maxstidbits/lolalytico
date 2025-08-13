@@ -1,4 +1,4 @@
-# Lolalytics API Documentation
+# Lolalytico Documentation
 
 A Python library for scraping League of Legends statistics from lolalytics.com with both async and sync support.
 
@@ -17,7 +17,7 @@ A Python library for scraping League of Legends statistics from lolalytics.com w
 ## Installation
 
 ```bash
-pip install lolalytics-api
+pip install lolalytico
 ```
 
 ## Quick Start
@@ -26,7 +26,7 @@ pip install lolalytics-api
 
 ```python
 import asyncio
-from lolalytics_api import LolalyticsClient
+from lolalytico import LolalyticsClient
 
 async def main():
     async with LolalyticsClient() as client:
@@ -40,7 +40,7 @@ asyncio.run(main())
 ### Sync Usage
 
 ```python
-from lolalytics_api import get_tierlist, get_counters, get_champion_data
+from lolalytico import get_tierlist, get_counters, get_champion_data
 
 # Get top 10 champions for top lane in diamond+
 tierlist = get_tierlist(10, lane="top", rank="diamond+")
@@ -82,6 +82,8 @@ Get the champion tier list.
 List[Dict[str, str]]  # List of champion data
 ```
 
+Note: Each champion dict includes the "pbi" field (Pick Ban Influence) as a string. PBI = (win - AvgWinofTier) * 100 * pick / (100 - ban).
+
 **Example Response:**
 ```python
 [
@@ -89,7 +91,8 @@ List[Dict[str, str]]  # List of champion data
         "rank": "1",
         "champion": "Yasuo",
         "tier": "S+",
-        "winrate": "52.3%"
+        "winrate": "52.3%",
+        "pbi": "2.45"
     },
     # ... more champions
 ]
@@ -295,7 +298,7 @@ Valid rank values and their shortcuts:
 Raised when an invalid lane value is provided.
 
 ```python
-from lolalytics_api.errors import InvalidLane
+from lolalytico.errors import InvalidLane
 
 try:
     await client.get_tierlist(lane="invalid_lane")
@@ -309,7 +312,7 @@ except InvalidLane as e:
 Raised when an invalid rank value is provided.
 
 ```python
-from lolalytics_api.errors import InvalidRank
+from lolalytico.errors import InvalidRank
 
 try:
     await client.get_tierlist(rank="invalid_rank")
@@ -324,7 +327,7 @@ except InvalidRank as e:
 
 ```python
 import asyncio
-from lolalytics_api import LolalyticsClient
+from lolalytico import LolalyticsClient
 
 async def get_top_tierlist():
     async with LolalyticsClient() as client:
@@ -341,7 +344,7 @@ asyncio.run(get_top_tierlist())
 
 ```python
 import asyncio
-from lolalytics_api import LolalyticsClient
+from lolalytico import LolalyticsClient
 
 async def find_yasuo_counters():
     async with LolalyticsClient() as client:
@@ -358,7 +361,7 @@ asyncio.run(find_yasuo_counters())
 
 ```python
 import asyncio
-from lolalytics_api import LolalyticsClient
+from lolalytico import LolalyticsClient
 
 async def analyze_champion():
     async with LolalyticsClient() as client:
@@ -377,7 +380,7 @@ asyncio.run(analyze_champion())
 
 ```python
 import asyncio
-from lolalytics_api import LolalyticsClient
+from lolalytico import LolalyticsClient
 
 async def compare_matchup():
     async with LolalyticsClient() as client:
@@ -399,7 +402,7 @@ asyncio.run(compare_matchup())
 
 ```python
 import asyncio
-from lolalytics_api import LolalyticsClient
+from lolalytico import LolalyticsClient
 
 async def check_patch_changes():
     async with LolalyticsClient() as client:
@@ -415,7 +418,7 @@ asyncio.run(check_patch_changes())
 ### Using Sync Functions
 
 ```python
-from lolalytics_api import get_tierlist, get_counters, display_lanes, display_ranks
+from lolalytico import get_tierlist, get_counters, display_lanes, display_ranks
 
 # Display available options
 display_lanes()
@@ -435,8 +438,8 @@ The API provides comprehensive error handling:
 
 ```python
 import asyncio
-from lolalytics_api import LolalyticsClient
-from lolalytics_api.errors import InvalidLane, InvalidRank
+from lolalytico import LolalyticsClient
+from lolalytico.errors import InvalidLane, InvalidRank
 
 async def safe_api_call():
     async with LolalyticsClient() as client:

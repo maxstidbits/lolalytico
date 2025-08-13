@@ -1,9 +1,9 @@
 # Unofficial Lolalytics scraper  
 [TBA] a lot of things
 
-## Installation  
+## Installation
 ```bash
-pip install lolalytics-api
+pip install lolalytico
 ```
 
 ## Functions  
@@ -17,13 +17,15 @@ pip install lolalytics-api
       "rank": "1",
       "champion": "Ahri",
       "tier": "S+",
-      "winrate": "52.73"
+      "winrate": "52.73",
+      "pbi": "2.45"
     },
   "1": {
       "rank": "2",
       "champion": "Yone",
       "tier": "S",
-      "winrate": "50.92"
+      "winrate": "50.92",
+      "pbi": "1.12"
     }
 }
 ```
