@@ -3,12 +3,12 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "lolalytics-api"
-version = "0.0.6"
+name = "lolalytico"
+version = "0.0.7"
 authors = [
   { name = "Max Tretikov" }
 ]
-description = "Unofficial Lolalytics scraper"
+description = "Unofficial async Lolalytics scraper"
 readme = "README.md"
 requires-python = ">=3.6"
 dependencies = [
@@ -31,6 +31,6 @@ test = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/maxstidbits/lolalytics-api"
-Repository = "https://github.com/maxstidbits/lolalytics-api"
-Issues = "https://github.com/maxstidbits/lolalytics-api/issues"
+Homepage = "https://github.com/maxstidbits/lolalytico"
+Repository = "https://github.com/maxstidbits/lolalytico"
+Issues = "https://github.com/maxstidbits/lolalytico/issues"
