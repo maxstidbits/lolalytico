@@ -5,7 +5,7 @@ from urllib.parse import urlencode, urljoin
 import aiohttp
 from lxml import html
 
-from lolalytics_api.errors import InvalidLane, InvalidRank
+from lolalytico.errors import InvalidLane, InvalidRank
 
 
 # ---- Public convenience helpers (legacy compatibility) ----
@@ -196,15 +196,23 @@ class LolalyticsClient:
             champion_xpath = f"/html/body/main/div[6]/div[{i}]/div[3]/a"
             tier_xpath = f"/html/body/main/div[6]/div[{i}]/div[4]"
             winrate_xpath = f"/html/body/main/div[6]/div[{i}]/div[6]/div/span[1]"
+            # PBI (Pick Ban Influence) appears in the table header as the 8th column.
+            # Attempt to extract it; if unavailable, fall back to empty string.
+            pbi_xpath = f"/html/body/main/div[6]/div[{i}]/div[8]/div"
             r = tree.xpath(rank_xpath)[0].text_content().strip()
             champion = tree.xpath(champion_xpath)[0].text_content().strip()
             tier = tree.xpath(tier_xpath)[0].text_content().strip()
             winrate = tree.xpath(winrate_xpath)[0].text_content().strip()
+            try:
+                pbi = tree.xpath(pbi_xpath)[0].text_content().strip()
+            except IndexError:
+                pbi = ""
             results.append({
                 "rank": r,
                 "champion": champion,
                 "tier": tier,
                 "winrate": winrate,
+                "pbi": pbi,
             })
         return results
 

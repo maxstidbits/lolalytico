@@ -1,8 +1,8 @@
 import json
 import pytest
 
-from lolalytics_api.main import LolalyticsClient, display_lanes, display_ranks
-from lolalytics_api.errors import InvalidLane, InvalidRank
+from lolalytico.main import LolalyticsClient, display_lanes, display_ranks
+from lolalytico.errors import InvalidLane, InvalidRank
 
 pytestmark = pytest.mark.asyncio
 
@@ -50,8 +50,14 @@ class TestGetTierlist:
             result = await client.get_tierlist(1)
         assert isinstance(result, list)
         assert len(result) == 1
-        labels = ["rank", "champion", "tier", "winrate"]
+        labels = ["rank", "champion", "tier", "winrate", "pbi"]
         _check_labels(result[0], labels)
+
+    async def test_pbi_field_present_and_string(self):
+        async with LolalyticsClient() as client:
+            result = await client.get_tierlist(1)
+        assert "pbi" in result[0]
+        assert isinstance(result[0]["pbi"], str)
 
 
 class TestGetCounters:

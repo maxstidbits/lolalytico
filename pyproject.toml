@@ -34,9 +34,3 @@ test = [
 Homepage = "https://github.com/maxstidbits/lolalytics-api"
 Repository = "https://github.com/maxstidbits/lolalytics-api"
 Issues = "https://github.com/maxstidbits/lolalytics-api/issues"
-
-[tool.setuptools.packages.find]
-where = ["src"]
-
-[tool.setuptools.package-dir]
-"" = "src"
