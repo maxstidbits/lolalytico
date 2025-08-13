@@ -1,5 +1,6 @@
 import json
 import pytest
+from lxml import html
 
 from lolalytico.main import LolalyticsClient, display_lanes, display_ranks
 from lolalytico.errors import InvalidLane, InvalidRank
@@ -90,6 +91,37 @@ class TestChampionData:
             "games",
         ]
         _check_labels(data, labels)
+
+    async def test_damage_breakdown_viego(self, monkeypatch):
+        # Minimal HTML fragment containing the labels and numbers matching the real Viego page
+        html_snippet = """
+        <html><body>
+          <div class="stats">
+            <div>Physical Damage</div><div>15,708</div>
+            <div>Magic Damage</div><div>1,862</div>
+            <div>True Damage</div><div>1,073</div>
+            <div>Total Damage</div><div>18,646</div>
+          </div>
+        </body></html>
+        """
+
+        async def fake_fetch_tree(self, url):
+            return html.fromstring(html_snippet)
+
+        monkeypatch.setattr(LolalyticsClient, "_fetch_tree", fake_fetch_tree)
+
+        async with LolalyticsClient() as client:
+            data = await client.get_champion_data(champion="viego")
+
+        assert "damage" in data
+        dmg = data["damage"]
+        # Expected percentages (rounded to 1 decimal place):
+        # physical: 15708 / 18646 = 84.2345% -> "84.2%"
+        # magic:   1862  / 18646 = 9.988%   -> "10.0%"
+        # true:    1073  / 18646 = 5.755%   -> "5.8%"
+        assert dmg["physical_pct"] == "84.2%"
+        assert dmg["magic_pct"] == "10.0%"
+        assert dmg["true_pct"] == "5.8%"
 
     async def test_matchup(self):
         async with LolalyticsClient() as client:

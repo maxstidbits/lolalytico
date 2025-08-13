@@ -240,7 +240,7 @@ class LolalyticsClient:
         path = f"lol/{champion}/build/"
         url = self._build_url(path, lane=lane, rank=rank)
         tree = await self._fetch_tree(url)
-
+    
         labels = [
             "winrate",
             "wr_delta",
@@ -260,6 +260,63 @@ class LolalyticsClient:
             data[labels[i - 1]] = (
                 tree.xpath(current_xpath)[0].text_content().strip().split("\n")[0]
             )
+    
+        # ---- Damage breakdown (Physical / Magic / True / Total) ----
+        # Use label-based XPaths to be more resilient to structure changes.
+        physical_xpath = "//div[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'physical damage')]/following-sibling::div[1]"
+        magic_xpath = "//div[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'magic damage')]/following-sibling::div[1]"
+        true_xpath = "//div[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'true damage')]/following-sibling::div[1]"
+        total_xpath = "//div[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'total damage')]/following-sibling::div[1]"
+    
+        def _int_from_xpath(xpath_expr: str) -> int:
+            try:
+                nodes = tree.xpath(xpath_expr)
+                if not nodes:
+                    return 0
+                node = nodes[0]
+                text = node.text_content().strip() if hasattr(node, "text_content") else str(node).strip()
+                # Keep digits only from the start (handles "15,708" or "15,708\n18 / 63")
+                text = text.split("\n")[0].strip()
+                text = text.replace(",", "")
+                # Some pages may include non-digit suffixes; take the leading numeric part
+                num_str = ""
+                for ch in text:
+                    if (ch.isdigit() or ch == "."):
+                        num_str += ch
+                    else:
+                        break
+                if not num_str:
+                    return 0
+                # Parse as float then int to be tolerant of decimal formats
+                return int(float(num_str))
+            except Exception:
+                return 0
+    
+        phys = _int_from_xpath(physical_xpath)
+        mag = _int_from_xpath(magic_xpath)
+        tru = _int_from_xpath(true_xpath)
+        tot = _int_from_xpath(total_xpath) or (phys + mag + tru)
+    
+        # Compute percentages (rounded to 1 decimal place) and format as strings
+        def _pct(part: int, whole: int) -> str:
+            try:
+                if whole <= 0:
+                    return "0%"
+                return f"{round(part / whole * 100, 1)}%"
+            except Exception:
+                return "0%"
+    
+        damage_info = {
+            "physical": str(phys),
+            "magic": str(mag),
+            "true": str(tru),
+            "total": str(tot),
+            "physical_pct": _pct(phys, tot),
+            "magic_pct": _pct(mag, tot),
+            "true_pct": _pct(tru, tot),
+        }
+    
+        data["damage"] = damage_info
         return data
 
     async def matchup(
